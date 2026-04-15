@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmation d'Achat - Prestige Motors</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            background: #000;
+            color: #fff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Background */
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .video-background video {
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+            opacity: 0.4;
+        }
+
+        .video-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                rgba(0, 0, 0, 0.85) 0%,
+                rgba(0, 0, 0, 0.75) 50%,
+                rgba(0, 0, 0, 0.9) 100%
+            );
+            z-index: -1;
+        }
+
+        .fallback-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0f0f1e 100%);
+            z-index: -2;
+        }
+
+        .smoke-effect {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at 30% 50%, rgba(100,100,255,0.08) 0%, transparent 60%),
+                        radial-gradient(ellipse at 70% 30%, rgba(0,100,200,0.06) 0%, transparent 50%);
+            animation: smokeFloat 15s ease-in-out infinite;
+        }
+
+        @keyframes smokeFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
+            33% { transform: translate(50px, -30px) scale(1.1); opacity: 0.8; }
+            66% { transform: translate(-30px, 40px) scale(0.9); opacity: 0.6; }
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 25px 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 22px;
+            letter-spacing: 5px;
+            font-weight: 400;
+            color: #fff;
+        }
+
+        .logo span {
+            color: #0066b1;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 40px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 12px;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            transition: all 0.3s;
+            font-weight: 300;
+        }
+
+        .nav-links a:hover {
+            color: #0066b1;
+        }
+
+        /* Buy Container */
+        .buy-container {
+            min-height: 100vh;
+            padding: 120px 20px 60px;
+        }
+
+        .buy-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Selected Car Display */
+        .car-display {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 40px;
+            background: rgba(0, 102, 177, 0.1);
+            border: 1px solid rgba(0, 102, 177, 0.3);
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 1s ease forwards 0.3s;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .car-display h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 48px;
+            letter-spacing: 6px;
+            margin-bottom: 15px;
+            color: #0066b1;
+        }
+
+        .car-display .car-subtitle {
+            font-size: 18px;
+            letter-spacing: 4px;
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: uppercase;
+        }
+
+        .car-display .car-price {
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            margin-top: 20px;
+            color: #fff;
+        }
+
+        /* Form Box */
+        .buy-box {
+            padding: 60px 50px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 1s ease forwards 0.6s;
+        }
+
+        .buy-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .buy-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 42px;
+            letter-spacing: 6px;
+            margin-bottom: 15px;
+            font-weight: 400;
+        }
+
+        .buy-header p {
+            font-size: 16px;
+            letter-spacing: 3px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #0066b1;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 20px rgba(0, 102, 177, 0.2);
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 20px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: #fff;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 14px;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.4s;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            background: #0066b1;
+            border-color: #0066b1;
+            box-shadow: 0 0 40px rgba(0, 102, 177, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 30px;
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            font-size: 13px;
+            letter-spacing: 3px;
+            transition: all 0.3s;
+        }
+
+        .back-link:hover {
+            color: #0066b1;
+        }
+
+        /* Success Message */
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 80px 50px;
+            background: rgba(0, 102, 177, 0.1);
+            border: 1px solid rgba(0, 102, 177, 0.3);
+        }
+
+        .success-message.show {
+            display: block;
+            animation: fadeInUp 1s ease;
+        }
+
+        .success-icon {
+            font-size: 80px;
+            margin-bottom: 30px;
+            color: #0066b1;
+        }
+
+        .success-message h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 42px;
+            letter-spacing: 6px;
+            margin-bottom: 20px;
+        }
+
+        .success-message p {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.8;
+            margin-bottom: 40px;
+        }
+
+        .home-btn {
+            display: inline-block;
+            padding: 18px 50px;
+            background: #0066b1;
+            color: #fff;
+            text-decoration: none;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 13px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            transition: all 0.4s;
+            border: 1px solid #0066b1;
+        }
+
+        .home-btn:hover {
+            background: transparent;
+            box-shadow: 0 0 30px rgba(0, 102, 177, 0.4);
+        }
+
+        /* Loader */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.8s, visibility 0.8s;
+        }
+
+        .loader.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loader-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            letter-spacing: 10px;
+            animation: loaderPulse 1.5s infinite;
+        }
+
+        @keyframes loaderPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav {
+                padding: 20px 25px;
+            }
+
+            .nav-links {
+                gap: 20px;
+            }
+
+            .buy-box {
+                padding: 40px 30px;
+            }
+
+            .buy-header h1 {
+                font-size: 32px;
+            }
+
+            .car-display h2 {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loader" id="loader">
+        <div class="loader-text">PRESTIGE MOTORS</div>
+    </div>
+
+    <!-- Video Background -->
+    <div class="video-background">
+        <video autoplay muted loop playsinline>
+            <source src="BMW1.mp4" type="video/mp4">
+        </video>
+    </div>
+    <div class="video-overlay"></div>
+    <div class="fallback-bg">
+        <div class="smoke-effect"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">PRESTIGE <span>MOTORS</span></div>
+        <ul class="nav-links">
+            <li><a href="index.html">Accueil</a></li>
+            <li><a href="index.html#collection">Collection</a></li>
+        </ul>
+    </nav>
+
+    <!-- Buy Form -->
+    <div class="buy-container">
+        <div class="buy-wrapper">
+            <!-- Selected Car Info -->
+            <div class="car-display" id="carDisplay">
+                <h2 id="carName">BMW Série M</h2>
+                <div class="car-subtitle" id="carModel">M5 Competition</div>
+                <div class="car-price" id="carPrice">À partir de 450 000 MAD</div>
+            </div>
+
+            <!-- Purchase Form -->
+            <div class="buy-box" id="buyForm">
+                <div class="buy-header">
+                    <h1>CONFIRMER L'ACHAT</h1>
+                    <p>Finalisez votre commande</p>
+                </div>
+
+                <form id="purchaseForm">
+                    <div class="form-group">
+                        <label for="nom">Nom Complet</label>
+                        <input type="text" id="nom" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Adresse Email</label>
+                        <input type="email" id="email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="telephone">Numéro de Téléphone</label>
+                        <input type="tel" id="telephone" placeholder="+212 6XX-XXXXXX" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="adresse">Adresse de Livraison</label>
+                        <textarea id="adresse" placeholder="Adresse complète pour la livraison..." required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes">Notes Supplémentaires (Optionnel)</label>
+                        <textarea id="notes" placeholder="Couleur préférée, options spécifiques..."></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Confirmer la Commande</button>
+                </form>
+
+                <a href="index.html#collection" class="back-link">← Retour à la collection</a>
+            </div>
+
+            <!-- Success Message -->
+            <div class="success-message" id="successMessage">
+                <div class="success-icon">✓</div>
+                <h2>COMMANDE CONFIRMÉE</h2>
+                <p>
+                    Merci pour votre confiance. Notre équipe vous contactera dans les plus brefs délais<br>
+                    pour finaliser les détails de votre achat.
+                </p>
+                <a href="index.html" class="home-btn">Retour à l'Accueil</a>
+            </div>
+        </div>
+    </div>
+     <script>
+    // ========== 🔄 LOADER ==========
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            document.getElementById('loader').classList.add('hidden');
+        }, 1000);
+    });
+
+    // ========== 🚗 بيانات السيارات ==========
+    // ⚠️ زيد هنا أي سيارة جديدة تبغي تضيفها
+    const carsData = {
+        'm5':  { name: 'BMW Série M', model: 'M5 Competition', price: '450 000 MAD' },
+        'i8':  { name: 'BMW i8', model: 'Hybride Rechargeable', price: '650 000 MAD' },
+        'x5m': { name: 'BMW X5 M', model: 'Competition', price: '780 000 MAD' },
+        's7':  { name: 'BMW Série 8', model: 'i7 xDrive60', price: '920 000 MAD' },
+        's4':  { name: 'BMW Série 4', model: 'M440i xDrive', price: '380 000 MAD' },
+        'x3':  { name: 'BMW X3', model: 'xDrive30e Hybride', price: '350 000 MAD' },
+        's1':  { name: 'BMW Série 1', model: '118i', price: '220 000 MAD' },
+        's3':  { name: 'BMW Série 3', model: '330i', price: '280 000 MAD' },
+        's5':  { name: 'BMW Série 5', model: '530e', price: '420 000 MAD' },
+        'x1':  { name: 'BMW X1', model: 'sDrive20i', price: '260 000 MAD' },
+        'x7':  { name: 'BMW X7', model: 'xDrive40i', price: '850 000 MAD' },
+        'ix':  { name: 'BMW iX', model: 'xDrive50', price: '720 000 MAD' }
+    };
+
+    // ========== 🚀 الكود الرئيسي أول ما الصفحة تتحمل ==========
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // 1️⃣ نجيبو السيارة المختارة من الذاكرة 📓
+        const selectedCar = localStorage.getItem('selectedCar');
+        
+        // 2️⃣ نجيبو بيانات المستخدم إذا ديجا مسجل 👤
+        let userData = null;
+        try {
+            userData = JSON.parse(localStorage.getItem('userData'));
+        } catch(e) {
+            console.log('⚠️ ما كاينش بيانات مستخدم');
+        }
+        
+        // 3️⃣ إذا كاينة سيارة مختارة، نعرضو المعلومات 🚗
+        if (selectedCar && carsData[selectedCar]) {
+            
+            const car = carsData[selectedCar];
+            
+            // نعرضو المعلومات في الصفحة 🔽
+            document.getElementById('carName').textContent = car.name;
+            document.getElementById('carModel').textContent = car.model;
+            document.getElementById('carPrice').textContent = 'À partir de ' + car.price;
+            
+            console.log('✅ تم عرض السيارة: ' + car.name);
+            
+            // نحفظو معلومات السيارة باش نستعملوها بعد في الفورم
+            localStorage.setItem('selectedCarInfo', JSON.stringify(car));
+            
+            // 4️⃣ إذا المستخدم مسجل، نملأ الفورم تلقائياً ✨
+            if (userData) {
+                document.getElementById('nom').value = (userData.nom || '') + ' ' + (userData.prenom || '');
+                document.getElementById('email').value = userData.email || '';
+                document.getElementById('telephone').value = userData.telephone || '';
+                document.getElementById('adresse').value = userData.adresse || '';
+                console.log('👤 تم ملء بيانات المستخدم تلقائياً');
+            }
+            
+        } else {
+            // ❌ ما كاينش سيارة مختارة → نرجعو للرئيسية
+            console.log('⚠️ ما كاينش سيارة مختارة، جاري التحويل للرئيسية...');
+            window.location.href = 'index.html';
+        }
+    });
+
+    // ========== 📦 معالجة إرسال الفورم ==========
+    document.getElementById('purchaseForm').addEventListener('submit', function(e) {
+        e.preventDefault(); // 🚫 نمنعو إعادة تحميل الصفحة
+        
+        // 1️⃣ نجمعو بيانات الطلب 📋
+        const orderData = {
+            car: JSON.parse(localStorage.getItem('selectedCarInfo')),
+            customer: {
+                nom: document.getElementById('nom').value,
+                email: document.getElementById('email').value,
+                telephone: document.getElementById('telephone').value,
+                adresse: document.getElementById('adresse').value,
+                notes: document.getElementById('notes').value
+            },
+            date: new Date().toLocaleString('fr-MA'),
+            orderId: 'PM-' + Date.now() // رقم طلب فريد
+        };
+        
+        // 2️⃣ نحفظو الطلب في الذاكرة (للعرض فقط - في الموقع الحقيقي كيتبع للسيرفر) 💾
+        localStorage.setItem('currentOrder', JSON.stringify(orderData));
+        
+        console.log('✅ تم تأكيد الطلب: ' + orderData.orderId);
+        
+        // 3️⃣ نخبيو الفورم و نوريو رسالة النجاح 🎉
+        document.getElementById('buyForm').style.display = 'none';
+        document.getElementById('carDisplay').style.display = 'none';
+        document.getElementById('successMessage').classList.add('show');
+        
+        // 4️⃣ ننقاو السيارة المختارة من الذاكرة 🧹
+        localStorage.removeItem('selectedCar');
+        localStorage.removeItem('selectedCarInfo');
+        
+        // 5️⃣ (اختياري) نرجعو للفوق باش المستخدم يشوف رسالة النجاح
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+</script> 
+</body>
+</html>
+   
